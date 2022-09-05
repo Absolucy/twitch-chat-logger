@@ -9,6 +9,7 @@ extern crate log;
 
 pub mod config;
 pub mod process;
+pub mod rollup;
 pub mod token;
 
 use color_eyre::eyre::{Result, WrapErr};
@@ -19,6 +20,7 @@ use irc::{
 };
 use migration::{Migrator, MigratorTrait};
 use sea_orm::{ConnectOptions, Database};
+use std::sync::Arc;
 
 #[global_allocator]
 static ALLOC: snmalloc_rs::SnMalloc = snmalloc_rs::SnMalloc;
@@ -28,12 +30,14 @@ async fn main() -> Result<()> {
 	color_eyre::install()?;
 	pretty_env_logger::init();
 
-	let config = ron::from_str::<config::Config>(
-		&tokio::fs::read_to_string("config.ron")
-			.await
-			.wrap_err("failed to read config.ron")?,
-	)
-	.wrap_err("failed to parse config.ron")?;
+	let config = Arc::new(
+		ron::from_str::<config::Config>(
+			&tokio::fs::read_to_string("config.ron")
+				.await
+				.wrap_err("failed to read config.ron")?,
+		)
+		.wrap_err("failed to parse config.ron")?,
+	);
 
 	let token = token::get_token(&config.twitch)
 		.await
@@ -45,6 +49,8 @@ async fn main() -> Result<()> {
 		.sqlx_logging_level(log::LevelFilter::Trace);
 	let db = Database::connect(sql_config).await?;
 	Migrator::up(&db, None).await?;
+
+	tokio::spawn(rollup::rollup_task(db.clone(), config.clone()));
 
 	let irc_config = Config {
 		server: Some("irc.chat.twitch.tv".to_string()),

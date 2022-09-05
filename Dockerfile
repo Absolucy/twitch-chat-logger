@@ -20,6 +20,6 @@ FROM debian:bullseye-slim AS runtime
 WORKDIR /app
 COPY --from=builder /app/target/release/twitch-chat-logger /usr/local/bin
 ENV RUST_LOG=info
-VOLUME ["/app/.refreshed-token.json", "/app/config.ron"]
+VOLUME ["/app/.refreshed-token.json", "/app/config.ron", "/app/rollups"]
 ENTRYPOINT ["/usr/local/bin/twitch-chat-logger"]
 
