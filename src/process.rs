@@ -8,7 +8,7 @@ use entity::messages::{
 	ActiveModel as MessageActiveModel, Column as MessageColumn, Entity as MessageEntity,
 };
 use irc::proto::{message::Tag, Command, Message};
-use sea_orm::{prelude::*, ActiveValue::Set, DatabaseConnection, EntityTrait};
+use sea_orm::{prelude::*, ActiveValue::Set, DatabaseConnection, EntityTrait, Unchanged};
 use std::collections::HashMap;
 use time::{Duration, OffsetDateTime, PrimitiveDateTime};
 use tokio::sync::mpsc;
@@ -155,6 +155,7 @@ async fn handle_clearmsg(db: &DatabaseConnection, tags: HashMap<String, Option<S
 		}
 	};
 	let model = MessageActiveModel {
+		id: Unchanged(target_msg_id),
 		deleted: Set(true),
 		deleted_at: Set(Some(timestamp)),
 		..Default::default()
