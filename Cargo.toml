@@ -1,0 +1,30 @@
+[package]
+name = "twitch-chat-logger"
+version = "0.1.0"
+edition = "2021"
+authors = ["Lucy <lucy@absolucy.moe>"]
+license = "MPL-2.0"
+description = "A simple chat logger for Twitch"
+repository = "https://github.com/Absolucy/twitch-chat-logger"
+
+[workspace]
+members = [".", "migration", "entity"]
+
+[dependencies]
+color-eyre = "0.6"
+entity = { path = "entity" }
+futures-util = "0.3"
+irc = { version = "0.15", default-features = false, features = ["tls-rust"] }
+log = "0.4"
+migration = { path = "migration" }
+pretty_env_logger = "0.4.0"
+reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls"] }
+ron = "0.8"
+sea-orm = { version = "0.9", features = ["runtime-tokio-rustls", "sqlx-mysql", "sqlx-postgres", "sqlx-sqlite"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+snmalloc-rs = "0.3"
+time = "0.3"
+tokio = { version = "1", features = ["full"] }
+twitch_oauth2 = { version = "0.8", features = ["reqwest"] }
+uuid = "1"

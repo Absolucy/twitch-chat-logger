@@ -1,0 +1,11 @@
+(
+	twitch: (
+		username: "LeEpicFunnyBot",
+		access_token: "asdfghjkjhgbfdeswdefghjkjhngbfdswdfgh",
+		refresh_token: "asdfghjkjhgbfdeswdefghjkjhngbfdswdfgh",
+		client_id: "asdfghjkjhgbfdeswdefghjkjhngbfdswdfgh",
+		client_secret: "asdfghjkjhgbfdeswdefghjkjhngbfdswdfgh",
+		channels: ["Jerma985"]
+	),
+	database: "postgres://user:password@localhost/twitch-chat-logger"
+)
