@@ -162,7 +162,6 @@ async fn handle_clearmsg(db: &DatabaseConnection, tags: HashMap<String, Option<S
 	};
 	error!("Message deleted: {}", target_msg_id);
 	MessageEntity::update(model)
-		.filter(MessageColumn::Id.eq(target_msg_id))
 		.exec(db)
 		.await
 		.expect("failed to update message");
