@@ -63,6 +63,7 @@ pub async fn rollup_task(db: DatabaseConnection, config: Arc<Config>) {
 
 async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date) -> Result<()> {
 	let mut files = AHashMap::<String, ZstdEncoder<BufWriter<File>>>::new();
+	let mut messages_saved = AHashMap::<String, usize>::new();
 	let start_of_day = date.with_time(Time::MIDNIGHT);
 	let end_of_day = start_of_day + Duration::days(1) - Duration::nanoseconds(1);
 
@@ -89,6 +90,10 @@ async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date)
 					ZstdEncoder::new(BufWriter::new(file))
 				})
 			});
+			messages_saved
+				.entry(message.channel.clone())
+				.and_modify(|x| *x += 1)
+				.or_insert(1);
 			let chat_message = if let Some(deleted_at) = message.deleted_at {
 				format!(
 					"[{}] <{}; deleted at {}> {}\n",
@@ -130,6 +135,10 @@ async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date)
 			.await
 			.wrap_err_with(|| format!("failed to sync log file for {}", user))?;
 		info!("Rolled up user '{}' for {}", user, date);
+	}
+
+	for (user, messages) in messages_saved {
+		info!("Rolled up {} messages for {}", messages, user);
 	}
 
 	Ok(())

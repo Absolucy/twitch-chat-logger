@@ -4,9 +4,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use entity::messages::{
-	ActiveModel as MessageActiveModel, Column as MessageColumn, Entity as MessageEntity,
-};
+use entity::messages::{ActiveModel as MessageActiveModel, Entity as MessageEntity};
 use irc::proto::{message::Tag, Command, Message};
 use sea_orm::{prelude::*, ActiveValue::Set, DatabaseConnection, EntityTrait, Unchanged};
 use std::collections::HashMap;
