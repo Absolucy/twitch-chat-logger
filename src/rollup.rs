@@ -6,7 +6,6 @@
 
 use crate::config::Config;
 use ahash::AHashMap;
-use async_compression::tokio::write::ZstdEncoder;
 use color_eyre::eyre::{Result, WrapErr};
 use entity::messages::{Column as MessageColumn, Entity as MessageEntity, Model as Message};
 use sea_orm::{prelude::*, DatabaseConnection, EntityTrait, QueryOrder};
@@ -70,7 +69,7 @@ pub async fn rollup_task(
 }
 
 async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date) -> Result<()> {
-	let mut files = AHashMap::<String, ZstdEncoder<BufWriter<File>>>::new();
+	let mut files = AHashMap::<String, BufWriter<File>>::new();
 	let mut messages_saved = AHashMap::<String, usize>::new();
 	let start_of_day = date.with_time(Time::MIDNIGHT);
 	let end_of_day = start_of_day + Duration::days(1) - Duration::nanoseconds(1);
@@ -93,7 +92,7 @@ async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date)
 					config.rollup_dir.join(&file_name).with_extension("log.zst"),
 				)
 				.expect("failed to create log file");
-				ZstdEncoder::new(BufWriter::new(File::from_std(file)))
+				BufWriter::new(File::from_std(file))
 			});
 			messages_saved
 				.entry(message.channel.clone())
@@ -128,14 +127,8 @@ async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date)
 	for (user, mut file) in files.drain() {
 		file.flush()
 			.await
-			.wrap_err_with(|| format!("failed to flush log file for {}", user))?;
-		let mut buf_writer = file.into_inner();
-		buf_writer
-			.flush()
-			.await
 			.wrap_err_with(|| format!("failed to flush buffer for log file for {}", user))?;
-		buf_writer
-			.into_inner()
+		file.into_inner()
 			.sync_all()
 			.await
 			.wrap_err_with(|| format!("failed to sync log file for {}", user))?;

@@ -12,7 +12,6 @@ members = [".", "migration", "entity"]
 
 [dependencies]
 ahash = "0.8"
-async-compression = { version = "0.3", features = ["tokio", "zstd"] }
 async-signals = "0.4"
 color-eyre = "0.6"
 entity = { path = "entity" }
