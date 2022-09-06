@@ -200,6 +200,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-signals"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7764064e8871fca00fb487328c3c9cfc71c0871b46d7b61f0089fd8a2d69cc30"
+dependencies = [
+ "futures-core",
+ "nix",
+ "once_cell",
+]
+
+[[package]]
 name = "async-std"
 version = "1.12.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1353,6 +1364,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2dffe52ecf27772e601905b7522cb4ef790d2cc203488bbd0e2fe85fcb74566d"
 
 [[package]]
+name = "memoffset"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5aa361d4faea93603064a027415f07bd8e1d5c88c9fbf68bf56a285428fd79ce"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
 name = "migration"
 version = "0.1.0"
 dependencies = [
@@ -1391,6 +1411,19 @@ dependencies = [
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys",
+]
+
+[[package]]
+name = "nix"
+version = "0.23.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f866317acbd3a240710c63f065ffb1e4fd466259045ccb504130b7f668f35c6"
+dependencies = [
+ "bitflags",
+ "cc",
+ "cfg-if",
+ "libc",
+ "memoffset",
 ]
 
 [[package]]
@@ -2769,10 +2802,12 @@ version = "0.1.0"
 dependencies = [
  "ahash 0.8.0",
  "async-compression",
+ "async-signals",
  "color-eyre",
  "entity",
  "futures-util",
  "irc",
+ "libc",
  "log",
  "migration",
  "pretty_env_logger",
@@ -2784,6 +2819,7 @@ dependencies = [
  "snmalloc-rs",
  "time 0.3.14",
  "tokio",
+ "tokio-util 0.7.3",
  "twitch_oauth2",
  "uuid",
 ]

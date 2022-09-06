@@ -15,6 +15,7 @@ use time::{macros::format_description, Date, Duration, OffsetDateTime, Primitive
 use tokio::{
 	fs::File,
 	io::{AsyncWriteExt, BufWriter},
+	sync::mpsc,
 };
 
 /// Only read 128MB worth of messages at one time
@@ -29,7 +30,11 @@ fn get_text_log_file_name(channel: &str, dt: PrimitiveDateTime) -> Result<String
 	))
 }
 
-pub async fn rollup_task(db: DatabaseConnection, config: Arc<Config>) {
+pub async fn rollup_task(
+	db: DatabaseConnection,
+	config: Arc<Config>,
+	mut rx: mpsc::UnboundedReceiver<()>,
+) {
 	loop {
 		let todays_date = OffsetDateTime::now_utc();
 		let next_midnight = todays_date.replace_time(Time::MIDNIGHT) + Duration::days(1);
@@ -39,7 +44,10 @@ pub async fn rollup_task(db: DatabaseConnection, config: Arc<Config>) {
 			"Waiting {} seconds until next rollup",
 			time_til_next_midnight.whole_seconds()
 		);
-		tokio::time::sleep(time_til_next_midnight.unsigned_abs()).await;
+		tokio::select! {
+			_ = tokio::time::sleep(time_til_next_midnight.unsigned_abs()) => {},
+			_ = rx.recv() => {},
+		}
 		info!(
 			"Starting rollup for {}",
 			todays_date
