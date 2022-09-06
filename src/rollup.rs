@@ -88,15 +88,12 @@ async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date)
 		for message in messages {
 			let file_name = get_text_log_file_name(&message.channel, message.timestamp)
 				.wrap_err("failed to get text log file name for message")?;
-			let runtime_handle = tokio::runtime::Handle::current();
 			let file = files.entry(file_name.clone()).or_insert_with(|| {
-				runtime_handle.block_on(async move {
-					let file =
-						File::create(config.rollup_dir.join(&file_name).with_extension("log.zst"))
-							.await
-							.expect("failed to create log file");
-					ZstdEncoder::new(BufWriter::new(file))
-				})
+				let file = std::fs::File::create(
+					config.rollup_dir.join(&file_name).with_extension("log.zst"),
+				)
+				.expect("failed to create log file");
+				ZstdEncoder::new(BufWriter::new(File::from_std(file)))
 			});
 			messages_saved
 				.entry(message.channel.clone())
