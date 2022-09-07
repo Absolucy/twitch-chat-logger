@@ -88,10 +88,9 @@ async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date)
 			let file_name = get_text_log_file_name(&message.channel, message.timestamp)
 				.wrap_err("failed to get text log file name for message")?;
 			let file = files.entry(file_name.clone()).or_insert_with(|| {
-				let file = std::fs::File::create(
-					config.rollup_dir.join(&file_name).with_extension("log.zst"),
-				)
-				.expect("failed to create log file");
+				let file =
+					std::fs::File::create(config.rollup_dir.join(&file_name).with_extension("log"))
+						.expect("failed to create log file");
 				BufWriter::new(File::from_std(file))
 			});
 			messages_saved
