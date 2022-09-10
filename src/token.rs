@@ -18,26 +18,39 @@ struct TokenCache {
 	current_refresh_token: String,
 }
 
-async fn get_token_from_cache(config: &TwitchConfig) -> Result<(String, String)> {
+async fn get_token_from_cache(config: &TwitchConfig) -> Result<(String, String, String)> {
 	let path = PathBuf::from(".refreshed-token.json");
 	if !path.exists() {
-		return Ok((config.access_token.clone(), config.refresh_token.clone()));
+		return Ok((
+			config.access_token.clone(),
+			config.access_token.clone(),
+			config.refresh_token.clone(),
+		));
 	}
 	let token_cache_file = tokio::fs::read_to_string(&path)
 		.await
 		.wrap_err("failed to read .refreshed-token.json")?;
 	if token_cache_file.trim().is_empty() {
-		return Ok((config.access_token.clone(), config.refresh_token.clone()));
+		return Ok((
+			config.access_token.clone(),
+			config.access_token.clone(),
+			config.refresh_token.clone(),
+		));
 	}
 	let token_cache = serde_json::from_str::<TokenCache>(&token_cache_file)
 		.wrap_err("failed to parse .refreshed-token.json")?;
 	if token_cache.base_access_token == config.access_token {
 		Ok((
+			config.access_token.clone(),
 			token_cache.current_access_token,
 			token_cache.current_refresh_token,
 		))
 	} else {
-		Ok((config.access_token.clone(), config.refresh_token.clone()))
+		Ok((
+			config.access_token.clone(),
+			config.access_token.clone(),
+			config.refresh_token.clone(),
+		))
 	}
 }
 
@@ -83,7 +96,7 @@ async fn auto_refresh_token(
 }
 
 pub async fn get_token(config: &TwitchConfig) -> Result<String> {
-	let (access_token_string, refresh_token) = get_token_from_cache(config)
+	let (original_access_token, access_token_string, refresh_token) = get_token_from_cache(config)
 		.await
 		.wrap_err("failed to get token from cache")?;
 	let access_token = AccessToken::new(access_token_string.clone());
@@ -107,7 +120,7 @@ pub async fn get_token(config: &TwitchConfig) -> Result<String> {
 		.wrap_err("failed to validate token")?;
 	tokio::spawn(auto_refresh_token(
 		http_client,
-		access_token_string.clone(),
+		original_access_token.clone(),
 		validated_token,
 		refresh_token,
 		client_secret,
