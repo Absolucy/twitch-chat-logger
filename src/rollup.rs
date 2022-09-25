@@ -68,7 +68,7 @@ pub async fn rollup_task(
 	}
 }
 
-pub fn format_message(message: &Message) -> String {
+fn format_message(message: &Message) -> String {
 	if let Some(deleted_at) = message.deleted_at {
 		format!(
 			"[{}] <{}; deleted at {}> {}\n",

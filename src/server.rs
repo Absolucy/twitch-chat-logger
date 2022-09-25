@@ -7,7 +7,7 @@
 use crate::{
 	config::Config,
 	error::{Error, Result},
-	rollup::{format_message, MAX_MESSAGES_PER_PAGE},
+	rollup::MAX_MESSAGES_PER_PAGE,
 };
 use async_stream::try_stream;
 use axum::{
@@ -19,7 +19,7 @@ use axum::{
 	Router,
 };
 use axum_extra::extract::Query;
-use entity::messages::{Column as MessageColumn, Entity as MessageEntity};
+use entity::messages::{Column as MessageColumn, Entity as MessageEntity, Model as Message};
 use futures_util::Stream;
 use sea_orm::{prelude::*, DatabaseConnection, EntityTrait, QueryOrder, QuerySelect};
 use serde::Deserialize;
@@ -29,6 +29,7 @@ use std::{
 };
 use time::{
 	format_description::well_known::{Rfc2822, Rfc3339},
+	macros::format_description,
 	OffsetDateTime, PrimitiveDateTime, UtcOffset,
 };
 use tokio_util::sync::CancellationToken;
@@ -50,6 +51,37 @@ struct QueryParams {
 	start_time: Option<String>,
 	#[serde(rename = "end-time", alias = "end", alias = "to")]
 	end_time: Option<String>,
+}
+
+fn format_message(message: &Message) -> String {
+	if let Some(deleted_at) = message.deleted_at {
+		format!(
+			"[{}] <{}; deleted at {}> {}\n",
+			message
+				.timestamp
+				.format(format_description!(
+					"[year]/[month]/[day] [hour]:[minute]:[second]"
+				))
+				.expect("failed to format time"),
+			message.username,
+			deleted_at
+				.format(format_description!("[hour]:[minute]:[second]"))
+				.expect("failed to format time"),
+			message.message
+		)
+	} else {
+		format!(
+			"[{}] <{}> {}\n",
+			message
+				.timestamp
+				.format(format_description!(
+					"[year]/[month]/[day] [hour]:[minute]:[second]"
+				))
+				.expect("failed to format time"),
+			message.username,
+			message.message
+		)
+	}
 }
 
 fn convert_query_to_datetime(timestamp: Option<&str>) -> Option<PrimitiveDateTime> {
