@@ -76,11 +76,13 @@ async fn main() -> Result<()> {
 		}
 	});
 
-	tokio::spawn(server::run_server(
-		config.clone(),
-		db.clone(),
-		cancel_token.child_token(),
-	));
+	if config.port != 0 {
+		tokio::spawn(server::run_server(
+			config.clone(),
+			db.clone(),
+			cancel_token.child_token(),
+		));
+	}
 
 	let irc_config = Config {
 		server: Some("irc.chat.twitch.tv".to_string()),

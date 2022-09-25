@@ -152,9 +152,9 @@ async fn search(
 		StreamBody::new(response_stream(
 			db,
 			message_pages
-				.order_by_desc(MessageColumn::Timestamp)
+				.order_by_asc(MessageColumn::Timestamp)
 				.limit(MAX_MESSAGES_TO_READ)
-				.order_by_asc(MessageColumn::Timestamp),
+				.order_by_desc(MessageColumn::Timestamp),
 		)),
 	))
 }
