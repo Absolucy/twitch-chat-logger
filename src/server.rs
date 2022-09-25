@@ -87,9 +87,7 @@ fn response_stream(
 		}
 		while let Some(messages) = message_pages.fetch_and_next().await.map_err(Error::from)?{
 			for message in messages {
-				let mut formatted = format_message(&message);
-				formatted.push('\n');
-				yield formatted;
+				yield format_message(&message);
 			}
 		}
 	}
