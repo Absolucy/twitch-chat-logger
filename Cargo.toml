@@ -13,22 +13,27 @@ members = [".", "migration", "entity"]
 [dependencies]
 ahash = "0.8"
 async-signals = "0.4"
+async-stream = "0.3"
+axum = "0.6.0-rc.2"
+axum-extra = { version = "0.4.0-rc.1", features = ["query"] }
 color-eyre = "0.6"
 entity = { path = "entity" }
+futures = "0.3"
 futures-util = "0.3"
 irc = { version = "0.15", default-features = false, features = ["tls-rust"] }
 libc = "0.2"
 log = "0.4"
 migration = { path = "migration" }
 pretty_env_logger = "0.4.0"
-reqwest = { version = "0.11.11", default-features = false, features = ["rustls-tls"] }
+reqwest = { version = "0.11", default-features = false, features = ["rustls-tls"] }
 ron = "0.8"
 sea-orm = { version = "0.9", features = ["runtime-tokio-rustls", "sqlx-mysql", "sqlx-postgres", "sqlx-sqlite"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 snmalloc-rs = "0.3"
+thiserror = "1"
 time = { version = "0.3", features = ["macros", "formatting", "parsing"] }
 tokio = { version = "1", features = ["full"] }
-tokio-util = "0.7.3"
+tokio-util = "0.7"
 twitch_oauth2 = { version = "0.8", features = ["reqwest"] }
 uuid = "1"

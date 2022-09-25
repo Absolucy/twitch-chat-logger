@@ -18,7 +18,7 @@ use tokio::{
 };
 
 /// Only read 128MB worth of messages at one time
-const MAX_MESSAGES_PER_PAGE: usize = (128 * 1024 * 1024) / std::mem::size_of::<Message>();
+pub const MAX_MESSAGES_PER_PAGE: usize = (128 * 1024 * 1024) / std::mem::size_of::<Message>();
 
 fn get_text_log_file_name(channel: &str, dt: PrimitiveDateTime) -> Result<String> {
 	Ok(format!(
@@ -68,6 +68,33 @@ pub async fn rollup_task(
 	}
 }
 
+pub fn format_message(message: &Message) -> String {
+	if let Some(deleted_at) = message.deleted_at {
+		format!(
+			"[{}] <{}; deleted at {}> {}\n",
+			message
+				.timestamp
+				.format(format_description!("[hour]:[minute]:[second]"))
+				.expect("failed to format time"),
+			message.username,
+			deleted_at
+				.format(format_description!("[hour]:[minute]:[second]"))
+				.expect("failed to format time"),
+			message.message
+		)
+	} else {
+		format!(
+			"[{}] <{}> {}\n",
+			message
+				.timestamp
+				.format(format_description!("[hour]:[minute]:[second]"))
+				.expect("failed to format time"),
+			message.username,
+			message.message
+		)
+	}
+}
+
 async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date) -> Result<()> {
 	let mut files = AHashMap::<String, BufWriter<File>>::new();
 	let mut messages_saved = AHashMap::<String, usize>::new();
@@ -97,26 +124,7 @@ async fn rollup_everything(db: &DatabaseConnection, config: &Config, date: Date)
 				.entry(message.channel.clone())
 				.and_modify(|x| *x += 1)
 				.or_insert(1);
-			let chat_message = if let Some(deleted_at) = message.deleted_at {
-				format!(
-					"[{}] <{}; deleted at {}> {}\n",
-					message
-						.timestamp
-						.format(format_description!("[hour]:[minute]:[second]"))?,
-					message.username,
-					deleted_at.format(format_description!("[hour]:[minute]:[second]"))?,
-					message.message
-				)
-			} else {
-				format!(
-					"[{}] <{}> {}\n",
-					message
-						.timestamp
-						.format(format_description!("[hour]:[minute]:[second]"))?,
-					message.username,
-					message.message
-				)
-			};
+			let chat_message = format_message(&message);
 			file.write_all(&chat_message.into_bytes())
 				.await
 				.wrap_err("failed to write to log file")?;

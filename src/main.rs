@@ -8,8 +8,10 @@
 extern crate log;
 
 pub mod config;
+pub mod error;
 pub mod process;
 pub mod rollup;
+pub mod server;
 pub mod token;
 
 use async_signals::Signals;
@@ -73,6 +75,12 @@ async fn main() -> Result<()> {
 			}
 		}
 	});
+
+	tokio::spawn(server::run_server(
+		config.clone(),
+		db.clone(),
+		cancel_token.child_token(),
+	));
 
 	let irc_config = Config {
 		server: Some("irc.chat.twitch.tv".to_string()),

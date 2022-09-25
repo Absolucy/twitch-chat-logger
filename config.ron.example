@@ -7,5 +7,6 @@
 		client_secret: "asdfghjkjhgbfdeswdefghjkjhngbfdswdfgh",
 		channels: ["Jerma985"]
 	),
-	database: "postgres://user:password@localhost/twitch-chat-logger"
+	database: "postgres://user:password@localhost/twitch-chat-logger",
+	port: 1234
 )

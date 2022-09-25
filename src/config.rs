@@ -11,6 +11,7 @@ pub struct Config {
 	pub twitch: TwitchConfig,
 	pub database: String,
 	pub rollup_dir: PathBuf,
+	pub port: u16,
 }
 
 #[derive(Deserialize)]
