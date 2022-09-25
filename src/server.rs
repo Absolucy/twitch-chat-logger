@@ -21,7 +21,7 @@ use axum::{
 use axum_extra::extract::Query;
 use entity::messages::{Column as MessageColumn, Entity as MessageEntity};
 use futures_util::Stream;
-use sea_orm::{prelude::*, DatabaseConnection, EntityTrait};
+use sea_orm::{prelude::*, DatabaseConnection, EntityTrait, QueryOrder, QuerySelect};
 use serde::Deserialize;
 use std::{
 	net::{Ipv4Addr, SocketAddr},
@@ -33,7 +33,7 @@ use time::{
 };
 use tokio_util::sync::CancellationToken;
 
-pub const MAX_MESSAGES_TO_READ: usize = 1_000_000;
+pub const MAX_MESSAGES_TO_READ: u64 = 1_000_000;
 
 #[derive(Deserialize)]
 struct QueryParams {
@@ -82,9 +82,6 @@ fn response_stream(
 ) -> impl Stream<Item = Result<String>> {
 	try_stream! {
 		let mut message_pages = query.paginate(&db, MAX_MESSAGES_PER_PAGE);
-		if message_pages.num_items().await? > MAX_MESSAGES_TO_READ {
-			Err(Error::TooManyMessages)?;
-		}
 		while let Some(messages) = message_pages.fetch_and_next().await.map_err(Error::from)?{
 			for message in messages {
 				yield format_message(&message);
@@ -120,7 +117,13 @@ async fn search(
 
 	Ok((
 		StatusCode::OK,
-		StreamBody::new(response_stream(db, message_pages)),
+		StreamBody::new(response_stream(
+			db,
+			message_pages
+				.order_by_desc(MessageColumn::Timestamp)
+				.limit(MAX_MESSAGES_TO_READ)
+				.order_by_asc(MessageColumn::Timestamp),
+		)),
 	))
 }
 
