@@ -33,6 +33,8 @@ use time::{
 };
 use tokio_util::sync::CancellationToken;
 
+pub const MAX_MESSAGES_TO_READ: usize = 1_000_000;
+
 #[derive(Deserialize)]
 struct QueryParams {
 	#[serde(
@@ -80,6 +82,9 @@ fn response_stream(
 ) -> impl Stream<Item = Result<String>> {
 	try_stream! {
 		let mut message_pages = query.paginate(&db, MAX_MESSAGES_PER_PAGE);
+		if message_pages.num_items().await? > MAX_MESSAGES_TO_READ {
+			Err(Error::TooManyMessages)?;
+		}
 		while let Some(messages) = message_pages.fetch_and_next().await.map_err(Error::from)?{
 			for message in messages {
 				let mut formatted = format_message(&message);

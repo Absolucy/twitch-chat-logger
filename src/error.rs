@@ -1,3 +1,4 @@
+use crate::server::MAX_MESSAGES_TO_READ;
 use axum::{
 	http::StatusCode,
 	response::{IntoResponse, Response},
@@ -12,6 +13,11 @@ pub enum Error {
 	Database(#[from] sea_orm::error::DbErr),
 	#[error("io error: {0}")]
 	Io(#[from] std::io::Error),
+	#[error(
+		"too many messages requested; {} is the maximum. try making your request more specific",
+		MAX_MESSAGES_TO_READ
+	)]
+	TooManyMessages,
 }
 
 impl IntoResponse for Error {
@@ -19,6 +25,7 @@ impl IntoResponse for Error {
 		let (status, error_msg) = match self {
 			Self::Database(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
 			Self::Io(err) => (StatusCode::INTERNAL_SERVER_ERROR, err.to_string()),
+			Self::TooManyMessages => (StatusCode::BAD_REQUEST, self.to_string()),
 		};
 		let body = Json(json!({
 			"status": status.as_u16(),
