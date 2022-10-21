@@ -2,6 +2,12 @@
 
 This is a Twitch.tv bot that joins whatever channel you'd like and logs all messages it sees to a database, including deleted messages.
 
+## Instances
+
+| URL | Hosted By | Channels | Since (YYYY/MM/DD) |
+| --- | --- | --- | --- |
+| [chatlogs.absolucy.gay](https://chatlogs.absolucy.gay) | @Absolucy | [Jerma985](https://www.twitch.tv/jerma985), [nyanners](https://www.twitch.tv/nyanners), [Vinesauce](https://www.twitch.tv/Vinesauce), [Vargskelethor](https://twitch.tv/Vargskelethor) | 2022/09/07 |
+
 ## Configuration
 
 The bot is configured via the `config.ron` file, in the working directory the binary is ran from. See [config.ron.example](config.ron.example) for an example.
@@ -18,15 +24,10 @@ The bot is configured via the `config.ron` file, in the working directory the bi
 `client_secret`: The client secret of the bot.<br>
 `channels`: A list of Twitch channels to log. Case insensitive.<br>
 
-## Wait, doesn't Twitch hate things like this?
-
-Yup. Which is why, as a huge believer in freedom of information, I'm taking several precautions:
-
- - Every time I get it into a "stable" state (i.e I've just finished working on new features), I'll archive the entire thing on archive.org. This GitHub page should always be saved on archive.org
-   - I also make sure to save the full code downloads, so you can always try to go to `https://github.com/Absolucy/twitch-chat-logger/archive/refs/heads/main.zip` or `https://github.com/Absolucy/twitch-chat-logger/archive/refs/heads/main.tar.gz` on archive.org!
- - I plan to make my own instance's database available via either IPFS and/or torrent in the future.
-
-
 ## License
 
 This software, including its source code, is subject to the terms of the [Mozilla Public License, v2.0](LICENSE.md).
+
+### Amendment
+
+I, @Absolucy, fully give permission for any of my code (including the entirety of this project, twitch-chat-logger), anywhere, no matter the license, to be used to train machine learning models intended to be used for general-purpose programming or code analysis.
